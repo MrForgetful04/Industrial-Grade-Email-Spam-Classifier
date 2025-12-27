@@ -15,7 +15,7 @@ This project builds a **robust classifier for unstructured, noisy emails** — e
 
 **Balanced subset logic:**
 
-- Original: ~3,671 ham vs. >13,000 spam emails. A total of ~33716 entries.
+- Original: ~16545 ham vs. ~17171 spam emails. A total of ~33716 entries.
 - Created a **balanced subset**: randomly sampled **half of ham and half of spam**, yielding ~16,857 emails.
 - Ensures model does not overfit to the majority class.
 
