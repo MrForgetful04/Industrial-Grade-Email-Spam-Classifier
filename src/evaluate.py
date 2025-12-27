@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModel
 from joblib import load
 from scipy.sparse import hstack
 import re
+import random
 
 # ----------------------------
 # Load artifacts
@@ -57,15 +58,43 @@ def predict_email(text):
 # ----------------------------
 # Example usage
 # ----------------------------
-email_text = """Hi Team,
+ham_emails = [
+    "hi team please find attached the agenda for tomorrow’s meeting let me know if you have any questions or additional topics",
+    "just confirming that we are still on for lunch with the client tomorrow at 1 pm let me know if anything changes",
+    "re contracts and credit thanks i ll include it in the master file original message from farmer daren j sent thursday january 10 2002 8 02 am",
+    "we need to finalize the quarterly report before friday please send me your sections asap",
+    "hey, are we still on for the project call this afternoon? let me know"
+]
 
-Please find attached the agenda for our Friday meeting at 10 AM.  
-Let me know if you have any questions or topics to add.
+# Spam emails
+spam_emails = [
+    "claim your free bitcoin today by signing up with this exclusive link and start earning instantly click here to claim your bonus now",
+    "buy authentic luxury watches at 90% off for the next 24 hours only visit our website and secure your deal before it expires",
+    "your prescription is ready low cost prescription medications shipped overnight click here to order",
+    "get that new car 8434 people nowthe weather or climate in any particular environment can change and affect what people eat",
+    "introducing doctor formulated hgh human growth hormone increase energy and muscle strength click here to learn more"
+]
 
-Best regards,  
-Alice
-"""
+# Combine lists for general random sampling
+email_examples = ham_emails + spam_emails
 
-label, prob = predict_email(email_text)
-print("Predicted label:", "Spam" if label else "Ham")
-print("Probability of spam:", prob)
+def run_prediction(index=None):
+    """
+    Predict a single email.
+    If index is provided, use that email from email_examples.
+    Otherwise, select a random email.
+    """
+    if index is not None and 0 <= index < len(email_examples):
+        email_text = email_examples[index]
+    else:
+        email_text = random.choice(email_examples)
+    
+    label, prob = predict_email(email_text)
+    
+    print("Email text:\n", email_text, "\n")
+    print("Predicted label:", "Spam" if label else "Ham")
+    print("Probability of spam:", prob)
+
+# Example usage:
+run_prediction()          # Random email
+run_prediction(index=2)
