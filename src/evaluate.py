@@ -6,9 +6,7 @@ from scipy.sparse import hstack
 import re
 import random
 
-# ----------------------------
-# Load artifacts
-# ----------------------------
+
 tfidf = load("models/tfidf_vectorizer.joblib")
 scaler = load("models/handcrafted_scaler.joblib")
 model_lr = load("models/logreg_model.joblib")
@@ -20,9 +18,6 @@ bert_model.eval()
 device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 bert_model.to(device)
 
-# ----------------------------
-# Helper: handcrafted features
-# ----------------------------
 def extract_features(email_text):
     num_urls = len(re.findall(r'http[s]?://', email_text))
     has_html = int(bool(re.search(r'<.*?>', email_text)))
@@ -32,20 +27,16 @@ def extract_features(email_text):
     num_caps = sum(1 for c in email_text if c.isupper())
     return np.array([[num_urls, has_html, subject_len, body_len, num_exclamations, num_caps]])
 
-# ----------------------------
-# Compute BERT embedding
-# ----------------------------
+
 def compute_bert(text):
     encoded = tokenizer([text], padding=True, truncation=True, return_tensors='pt', max_length=300)
     for k in encoded:
         encoded[k] = encoded[k].to(device)
     with torch.no_grad():
         output = bert_model(**encoded)
-    return output.last_hidden_state[:,0,:].cpu().numpy()  # CLS token
+    return output.last_hidden_state[:,0,:].cpu().numpy()  
 
-# ----------------------------
-# Predict function
-# ----------------------------
+
 def predict_email(text):
     X_tfidf = tfidf.transform([text])
     X_hand = scaler.transform(extract_features(text))
@@ -55,9 +46,9 @@ def predict_email(text):
     y_prob = model_lr.predict_proba(X_final)[0][1]
     return y_pred, y_prob
 
-# ----------------------------
+
 # Example usage
-# ----------------------------
+
 ham_emails = [
     "hi team please find attached the agenda for tomorrow’s meeting let me know if you have any questions or additional topics",
     "just confirming that we are still on for lunch with the client tomorrow at 1 pm let me know if anything changes",
@@ -66,7 +57,7 @@ ham_emails = [
     "hey, are we still on for the project call this afternoon? let me know"
 ]
 
-# Spam emails
+
 spam_emails = [
     "claim your free bitcoin today by signing up with this exclusive link and start earning instantly click here to claim your bonus now",
     "buy authentic luxury watches at 90% off for the next 24 hours only visit our website and secure your deal before it expires",
@@ -75,7 +66,6 @@ spam_emails = [
     "introducing doctor formulated hgh human growth hormone increase energy and muscle strength click here to learn more"
 ]
 
-# Combine lists for general random sampling
 email_examples = ham_emails + spam_emails
 
 def run_prediction(index=None):
@@ -95,6 +85,5 @@ def run_prediction(index=None):
     print("Predicted label:", "Spam" if label else "Ham")
     print("Probability of spam:", prob)
 
-# Example usage:
-run_prediction()          # Random email
+run_prediction()  # Random email
 run_prediction(index=2)

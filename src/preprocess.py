@@ -3,17 +3,13 @@ import numpy as np
 import re
 import os
 
-# ----------------------------
-# 1) Load Enron Dataset
-# ----------------------------
-raw_path = "data/enron_spam_data.csv"  # adjust path
+
+raw_path = "data/enron_spam_data.csv"  
 df = pd.read_csv(raw_path)
 df.rename(columns={"Spam/Ham": "label"}, inplace=True)
 df['label'] = df['label'].map({"ham": 0, "spam": 1})
 
-# ----------------------------
-# 2) Industrial Cleaning Function
-# ----------------------------
+
 def clean_email(text):
     text = str(text).lower()
     text = re.sub(r"<.*?>", " ", text)        # HTML tags
@@ -26,9 +22,7 @@ def clean_email(text):
 df['subject_clean'] = df['Subject'].fillna("").apply(clean_email)
 df['body_clean'] = df['Message'].fillna("").apply(clean_email)
 
-# ----------------------------
-# 3) Handcrafted Feature Extraction
-# ----------------------------
+
 def extract_features(df):
     df['num_urls'] = df['Message'].apply(lambda x: len(re.findall(r"http\S+", str(x))))
     df['has_html'] = df['Message'].apply(lambda x: 1 if bool(re.search(r"<.*?>", str(x))) else 0)
@@ -40,15 +34,10 @@ def extract_features(df):
 
 df = extract_features(df)
 
-# ----------------------------
-# 4) Combine subject + body
-# ----------------------------
+
 df['text'] = df['subject_clean'] + " " + df['body_clean']
 
-# ----------------------------
-# 5) Write cleaned dataset to CSV
-# ----------------------------
-# Get folder of raw CSV
+
 folder = os.path.dirname(raw_path)
 clean_path = os.path.join(folder, "enron_spam_cleaned.csv")
 
