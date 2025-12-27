@@ -24,6 +24,52 @@ This project builds a **robust classifier for unstructured, noisy emails** — e
 - Reflects **real-world noise** — irregular formatting, punctuation, and inconsistent grammar.
 - Conventional clean datasets would make the task trivial; this dataset forces a model to handle ambiguity.
 
+**EDA and key takeaways:**
+```bash
+**Dataset Size & Structure**
+
+Total emails: 16,857 (exactly half of the original)
+
+Columns: 10 (label, subject_clean, body_clean, text, plus numeric features)
+
+**Missing values:**
+
+subject_clean: 159 (~0.9%)
+
+body_clean: 198 (~1.2%)
+
+Remaining columns are complete.
+
+Takeaway: Very small fraction of missing values — can be safely filled with empty strings without affecting the balance.
+
+**Label Distribution:**
+
+Spam (1): 8,585 (~50.9%)
+
+Ham (0): 8,272 (~49.1%)
+
+Takeaway: Labels remain perfectly balanced — ideal for training Logistic Regression or other classifiers. No need for oversampling.
+
+**Numeric Features:**
+Feature	                Mean	     Median	    Max         Observations
+num_urls	            0.0013	     0	        2	        Extremely sparse. Very few emails contain URLs — a strong but rare spam indicator.
+has_html	            0	         0	        0	        Always 0 → not informative in this subset.
+subject_len	            31	         28	        2,828	    Mostly short subjects; extreme outliers exist. Could be useful if you 
+                                                            want to flag unusually long subjects.
+body_len	            1,308	     593	    211,726	    Extreme outlier persists — some emails are gigantic. Likely forwards 
+                                                            attachments, or corrupted text. Consider truncation or log-scaling.
+num_exclamations	    1.19	     0	        82	        Sparse, but large values likely indicate spam. Useful feature.
+num_caps	            0	         0	        1	        Almost all zeros → not useful.
+
+**Takeaways for Modeling:**
+Strong potential features: body_len, num_exclamations, subject_len, num_urls
+Weak or useless features: has_html, num_caps
+
+Actionable preprocessing:
+Fill missing text values
+Possibly cap body_len or apply log-transform
+Keep numeric features sparse-aware (Logistic Regression handles sparse TF-IDF + numeric combined well)
+```
 ---
 
 ## Pipeline Overview
